@@ -51,17 +51,34 @@ export function createCombat(): CombatState {
   return { combatants: [], round: 1, turnId: null }
 }
 
+function assertFinite(value: number, label: string) {
+  if (!Number.isFinite(value)) throw new Error(`Ongeldige waarde voor ${label}: ${value}`)
+}
+
 export function addCombatant(state: CombatState, combatant: Combatant): CombatState {
   if (state.combatants.some((c) => c.id === combatant.id)) {
     throw new Error(`Deelnemer met id "${combatant.id}" bestaat al`)
   }
+  assertFinite(combatant.initiative, 'initiative')
+  assertFinite(combatant.dexMod, 'dexterity-modifier')
   if (combatant.kind !== 'player') {
+    assertFinite(combatant.ac, 'AC')
     const { current, max } = combatant.hp
+    assertFinite(current, 'huidige HP')
+    assertFinite(max, 'maximale HP')
+    if (current < 0 || max < 0) {
+      throw new Error(`HP mag niet negatief zijn (${current}/${max})`)
+    }
     if (current > max) {
       throw new Error(`Huidige HP (${current}) is hoger dan de maximale HP (${max})`)
     }
   }
-  return { ...state, combatants: [...state.combatants, combatant] }
+  // Kopie, zodat muteren door de aanroeper de state niet raakt.
+  const copy: Combatant =
+    combatant.kind === 'player'
+      ? { ...combatant }
+      : { ...combatant, hp: { ...combatant.hp }, conditions: [...combatant.conditions] }
+  return { ...state, combatants: [...state.combatants, copy] }
 }
 
 export function rollInitiative(dexMod: number, rng: () => number): number {
@@ -137,6 +154,7 @@ export function removeCondition(state: CombatState, id: string, condition: Condi
 }
 
 export function startCombat(state: CombatState): CombatState {
+  if (state.turnId !== null) throw new Error('Het gevecht is al gestart')
   if (state.combatants.length === 0) throw new Error('Een gevecht heeft deelnemers nodig')
   const first = initiativeOrder(state).find((c) => !isDown(c))
   if (!first) throw new Error('Niemand kan handelen')

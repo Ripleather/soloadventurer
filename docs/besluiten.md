@@ -4,6 +4,11 @@ Nieuwste bovenaan. De architectuurbesluiten staan in [architectuur.md](architect
 
 ## 2026-11-12
 
+- Review van S1 en S2 (aparte agent): validatie van deelnemers (eindige getallen, geen negatieve HP),
+  kopie bij toevoegen, `startCombat` weigert een gestart gevecht, `parseDice` weigert spaties tussen
+  cijfers en begrenst zijden en modifier op 1000. 0 HP betekent voor vijanden en NPC's
+  "uitgeschakeld" en de beurt wordt overgeslagen; onderscheid tussen dood en bewusteloos en
+  death saves voor NPC-bondgenoten volgen later.
 - Combat-state (`src/engine/combat.ts`): onveranderlijke pure functies, elke wijziging geeft een nieuwe
   state. Volgorde bij gelijke initiative: hoogste dexterity-modifier, daarna volgorde van toevoegen.
   `nextTurn` slaat vijanden en NPC's op 0 HP over; de ronde loopt op bij het omslaan van de volgorde.

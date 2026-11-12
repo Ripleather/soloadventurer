@@ -32,7 +32,34 @@ describe('parseDice', () => {
   })
 })
 
+describe('parseDice, randgevallen', () => {
+  it('weigert onvolledige of onmogelijke notatie', () => {
+    for (const bad of ['d0', 'd1', '2d6+', '2d6-', '-1d6', '1.5d6', '2d6+1+1', '2d6 3', '2 3d6']) {
+      expect(() => parseDice(bad), bad).toThrow()
+    }
+  })
+
+  it('accepteert spaties rond de modifier', () => {
+    expect(parseDice('2d6 - 1')).toEqual({ count: 2, sides: 6, modifier: -1 })
+  })
+
+  it('weigert te veel zijden of een te grote modifier', () => {
+    expect(() => parseDice('d1001')).toThrow()
+    expect(() => parseDice('d20+1001')).toThrow()
+    expect(() => parseDice('d99999999999999999999')).toThrow()
+    expect(parseDice('d1000+1000')).toEqual({ count: 1, sides: 1000, modifier: 1000 })
+  })
+})
+
 describe('rollDice', () => {
+  it('gebruikt de rng precies één keer per dobbelsteen, in volgorde', () => {
+    const values = [0, 0.5, 0.999999]
+    let calls = 0
+    const rng = () => values[calls++]
+    expect(rollDice('3d6', rng).rolls).toEqual([1, 4, 6])
+    expect(calls).toBe(3)
+  })
+
   it('geeft het minimum bij een rng die altijd 0 teruggeeft', () => {
     const result = rollDice('3d6+2', () => 0)
     expect(result.rolls).toEqual([1, 1, 1])
@@ -78,6 +105,13 @@ describe('createRng', () => {
       expect(value).toBeGreaterThanOrEqual(0)
       expect(value).toBeLessThan(1)
     }
+  })
+
+  it('geeft een vaste reeks voor een vaste seed', () => {
+    const rng = createRng(42)
+    expect([rng(), rng(), rng()]).toEqual([
+      0.6011037519201636, 0.44829055899754167, 0.8524657934904099,
+    ])
   })
 
   it('geeft verschillende reeksen voor verschillende seeds', () => {
