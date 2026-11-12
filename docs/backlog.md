@@ -31,4 +31,8 @@ Volgorde is een voorstel, de speler bepaalt de prioriteit.
 
 ## Ideeën
 
+- S3: conditions uit de tool-aanroep van het model valideren met `CONDITIONS` in het zod-schema.
+- Deelnemer verwijderen en einde van het gevecht herkennen (nu geeft `nextTurn` een nieuwe ronde
+  per aanroep als alleen de speler overblijft).
+- `rollInitiative` hergebruikt `Rng` en `rollDice`; de rng op bereik `[0, 1)` laten controleren.
 - Secure rng voor productie (`crypto.getRandomValues`) naast de seeded rng voor tests.

@@ -63,6 +63,27 @@ describe('addCombatant', () => {
     expect(() => addCombatant(state, enemy('goblin', 8))).toThrow()
   })
 
+  it('weigert negatieve HP, een negatief maximum en niet-eindige getallen', () => {
+    const add = (c: Combatant) => () => addCombatant(createCombat(), c)
+    expect(add(enemy('a', 10, { hp: { current: -5, max: 10 } }))).toThrow()
+    expect(add(enemy('a', 10, { hp: { current: 0, max: Number.NaN } }))).toThrow()
+    expect(add(enemy('a', 10, { ac: Number.NaN }))).toThrow()
+    expect(add(enemy('a', Number.NaN))).toThrow()
+    expect(add(enemy('a', 10, { dexMod: Number.POSITIVE_INFINITY }))).toThrow()
+    expect(add(player('speler', Number.NaN))).toThrow()
+  })
+
+  it('kopieert de deelnemer zodat later muteren de state niet raakt', () => {
+    const goblin = enemy('goblin', 10)
+    const state = addCombatant(createCombat(), goblin)
+    if (goblin.kind === 'player') throw new Error('verkeerd type')
+    goblin.hp.current = 1
+    goblin.conditions.push('prone')
+    expect(hpOf(state, 'goblin')).toBe(20)
+    const stored = state.combatants[0]
+    expect(stored.kind === 'player' ? [] : stored.conditions).toEqual([])
+  })
+
   it('weigert huidige HP boven de maximale HP', () => {
     const invalid = enemy('goblin', 12, { hp: { current: 30, max: 20 } })
     expect(() => addCombatant(createCombat(), invalid)).toThrow()
@@ -227,6 +248,45 @@ describe('beurten', () => {
     expect(currentCombatant(state)?.id).toBe('speler')
     state = nextTurn(state)
     expect(currentCombatant(state)?.id).toBe('a')
+  })
+
+  it('slaat uitgeschakelde deelnemers over over de ronde-grens heen', () => {
+    const downA = enemy('a', 12, { hp: { current: 0, max: 20 } })
+    const downB = enemy('b', 8, { hp: { current: 0, max: 20 } })
+    let state = startCombat(combatWith(player('speler', 17), downA, downB))
+    state = nextTurn(state)
+    expect(currentCombatant(state)?.id).toBe('speler')
+    expect(state.round).toBe(2)
+  })
+
+  it('begint een nieuwe ronde bij elke nextTurn als alleen de speler kan handelen', () => {
+    const down = enemy('a', 8, { hp: { current: 0, max: 20 } })
+    let state = startCombat(combatWith(player('speler', 17), down))
+    state = nextTurn(nextTurn(state))
+    expect(currentCombatant(state)?.id).toBe('speler')
+    expect(state.round).toBe(3)
+  })
+
+  it('geeft iemand die midden in een ronde wordt toegevoegd pas volgende ronde de beurt', () => {
+    let state = startCombat(combatWith(player('speler', 17), enemy('a', 8)))
+    state = addCombatant(state, enemy('nieuw', 20))
+    state = nextTurn(state)
+    state = nextTurn(state)
+    expect(state.round).toBe(2)
+    expect(currentCombatant(state)?.id).toBe('nieuw')
+  })
+
+  it('wijzigt de ingevoerde state niet bij conditions', () => {
+    const before = combatWith(enemy('goblin', 10, { conditions: ['prone'] }))
+    const frozen = structuredClone(before)
+    addCondition(before, 'goblin', 'poisoned')
+    removeCondition(before, 'goblin', 'prone')
+    expect(before).toEqual(frozen)
+  })
+
+  it('weigert startCombat op een gevecht dat al bezig is', () => {
+    const started = startCombat(combatWith(player('speler', 17)))
+    expect(() => startCombat(started)).toThrow()
   })
 
   it('geeft een fout bij het starten zonder deelnemers', () => {
