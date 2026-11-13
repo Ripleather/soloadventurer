@@ -10,28 +10,29 @@ Eén story per sessie. De testlijst is het acceptatiecriterium. Zie de Definitio
 - **S2: Engine-state voor vijanden en NPC's.** Combatants met HP, AC en conditions, initiative-
   volgorde, schade en genezing, beurten en rondes (`src/engine/combat.ts`).
 
+- **S3: Engine-tools.** Aanval en save voor vijanden en NPC's met zod-schema's en wisselbare
+  `Rules` (`src/engine/tools.ts`, `src/engine/rules.ts`).
+
 ## Gepland
 
 Volgorde is een voorstel, de speler bepaalt de prioriteit.
 
-1. **S3: Engine-tools.** Worp voor een vijand (aanval, schade, save) als tool met zod-schema.
-   Tests: onbekende vijand geeft een fout, uitkomst bevat het aanvalstotaal, schade met type.
-2. **S4: Provider-interface en eerste adapter.** Intern tool-formaat, een adapter met
+1. **S4: Provider-interface en eerste adapter.** Intern tool-formaat, een adapter met
    gemockte responses. Tests: tool-aanroep heen en terug, streaming, foutafhandeling.
-3. **S5: Overige adapters.** OpenRouter, OpenAI en Google achter dezelfde interface.
-4. **S6: Opslag.** Dexie-schema voor campagnes, export en import zonder API-key.
-5. **S7: Avontuur-import.** Markdown naar beats met een gemockt model. Tests: opdeling van een
+2. **S5: Overige adapters.** OpenRouter, OpenAI en Google achter dezelfde interface.
+3. **S6: Opslag.** Dexie-schema voor campagnes, export en import zonder API-key.
+4. **S7: Avontuur-import.** Markdown naar beats met een gemockt model. Tests: opdeling van een
    voorbeeld-avontuur, ruimtes en uitgangen.
-6. **S8: Personage-import.** pdf.js leest formuliervelden, terugval op tekst.
-7. **S9: Context-bouwer.** Kern, protocol, personage, beat, kaart en log tot een prompt.
-8. **S10: Orchestrator.** De beurtlus met tool-uitvoering.
-9. **S11: Chat en zijpaneel.** Interface voor invoer, uitvoer en campagnebeheer.
-10. **S12: Sessielog en samenvatting.** Automatisch log en samenvatting van lange sessies.
-11. **S13: Modelscenario's.** Vijf scenario's, uitvoerbaar tegen elk gekoppeld model.
+5. **S8: Personage-import.** pdf.js leest formuliervelden, terugval op tekst.
+6. **S9: Context-bouwer.** Kern, protocol, personage, beat, kaart en log tot een prompt.
+7. **S10: Orchestrator.** De beurtlus met tool-uitvoering.
+8. **S11: Chat en zijpaneel.** Interface voor invoer, uitvoer en campagnebeheer.
+9. **S12: Sessielog en samenvatting.** Automatisch log en samenvatting van lange sessies.
+10. **S13: Modelscenario's.** Vijf scenario's, uitvoerbaar tegen elk gekoppeld model.
 
 ## Ideeën
 
-- S3: conditions uit de tool-aanroep van het model valideren met `CONDITIONS` in het zod-schema.
+- Conditions uit de tool-aanroep van het model valideren met `CONDITIONS` in het zod-schema.
 - Deelnemer verwijderen en einde van het gevecht herkennen (nu geeft `nextTurn` een nieuwe ronde
   per aanroep als alleen de speler overblijft).
 - `rollInitiative` hergebruikt `Rng` en `rollDice`; de rng op bereik `[0, 1)` laten controleren.
