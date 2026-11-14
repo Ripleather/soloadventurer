@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { ZodError } from 'zod'
 import { addCombatant, createCombat, type Combatant, type CombatState } from './combat'
 import { houseRules, standardRules, type Rules } from './rules'
 import { attackInputSchema, executeAttack, executeSave, saveInputSchema } from './tools'
@@ -7,7 +8,7 @@ import { attackInputSchema, executeAttack, executeSave, saveInputSchema } from '
 function scripted(values: number[]) {
   let index = 0
   return () => {
-    if (index >= values.length) throw new Error('rng vaker aangeroepen dan verwacht')
+    if (index >= values.length) throw new Error('RNG_AANGEROEPEN')
     return values[index++]
   }
 }
@@ -134,21 +135,73 @@ describe('executeAttack', () => {
     expect(dis.d20).toBe(3)
   })
 
+  it('geeft nooit negatieve schade: een negatieve modifier stopt op 0', () => {
+    const negatief = { ...aanval, damage: '1d4-3' }
+    const hit = executeAttack(arena(), negatief, scripted([d20(15), die(1, 4)]), houseRules)
+    expect(hit.damage?.total).toBe(0)
+    const crit = executeAttack(
+      arena(),
+      { ...aanval, damage: '1d4-9' },
+      scripted([d20(20), die(1, 4)]),
+      houseRules,
+    )
+    expect(crit.damage?.total).toBe(0)
+  })
+
+  it('gebruikt de gekozen d20 voor nat 1 en nat 20 bij advantage en disadvantage', () => {
+    const adv20 = executeAttack(
+      arena(),
+      { ...aanval, advantage: 'advantage', attackBonus: -10 },
+      scripted([d20(1), d20(20), die(1, 8)]),
+      houseRules,
+    )
+    expect(adv20.outcome).toBe('crit')
+    const dis1 = executeAttack(
+      arena(),
+      { ...aanval, advantage: 'disadvantage', attackBonus: 30 },
+      scripted([d20(1), d20(20)]),
+      houseRules,
+    )
+    expect(dis1.outcome).toBe('miss')
+    const adv1 = executeAttack(
+      arena(),
+      { ...aanval, advantage: 'advantage', attackBonus: 30 },
+      scripted([d20(1), d20(12), die(1, 8)]),
+      houseRules,
+    )
+    expect(adv1.outcome).toBe('hit')
+  })
+
+  it('rolt standaard één d20 als advantage ontbreekt', () => {
+    const result = executeAttack(arena(), aanval, scripted([d20(15), die(1, 8)]), houseRules)
+    expect(result.rolls).toHaveLength(1)
+    expect(attackInputSchema.parse(aanval).advantage).toBe('normal')
+    expect(saveInputSchema.parse({ creatureId: 'goblin', bonus: 0, dc: 10 }).advantage).toBe(
+      'normal',
+    )
+  })
+
+  it('werkt standaardregels ook met veel dice (crit verdubbelt het aantal)', () => {
+    const rng = scripted([d20(20), ...Array.from({ length: 120 }, () => die(1, 6))])
+    const result = executeAttack(arena(), { ...aanval, damage: '60d6' }, rng, standardRules)
+    expect(result.damage?.rolls).toHaveLength(120)
+  })
+
   it('geeft een fout voor een onbekende aanvaller', () => {
     expect(() =>
       executeAttack(arena(), { ...aanval, attackerId: 'draak' }, scripted([]), houseRules),
-    ).toThrow(/draak/)
+    ).toThrow(/Onbekend wezen "draak"/)
   })
 
   it('geeft een fout als de speler wordt opgegeven: de speler rolt zelf', () => {
     expect(() =>
       executeAttack(arena(), { ...aanval, attackerId: 'speler' }, scripted([]), houseRules),
-    ).toThrow()
+    ).toThrow(/is de speler/)
   })
 
   it('geeft een fout voor een uitgeschakelde aanvaller', () => {
     const state = [goblin({ hp: { current: 0, max: 7 } })].reduce(addCombatant, createCombat())
-    expect(() => executeAttack(state, aanval, scripted([]), houseRules)).toThrow()
+    expect(() => executeAttack(state, aanval, scripted([]), houseRules)).toThrow(/uitgeschakeld/)
   })
 
   it('geeft een fout bij ongeldige invoer', () => {
@@ -160,7 +213,7 @@ describe('executeAttack', () => {
       { ...aanval, targetAc: undefined },
     ]
     for (const invoer of slecht) {
-      expect(() => executeAttack(arena(), invoer, scripted([]), houseRules)).toThrow()
+      expect(() => executeAttack(arena(), invoer, scripted([]), houseRules)).toThrow(ZodError)
     }
   })
 
@@ -192,6 +245,16 @@ describe('executeSave', () => {
     expect(result.success).toBe(true)
   })
 
+  it('geeft bij advantage beide worpen terug in rolls', () => {
+    const result = executeSave(
+      arena(),
+      { ...save, advantage: 'advantage' },
+      scripted([d20(4), d20(18)]),
+      houseRules,
+    )
+    expect(result.rolls).toEqual([4, 18])
+  })
+
   it('laat een natuurlijke 20 niet automatisch slagen', () => {
     const result = executeSave(arena(), { ...save, bonus: -10 }, scripted([d20(20)]), houseRules)
     expect(result.success).toBe(false)
@@ -217,11 +280,13 @@ describe('executeSave', () => {
   it('geeft een fout voor een onbekende wezen, de speler of ongeldige invoer', () => {
     expect(() =>
       executeSave(arena(), { ...save, creatureId: 'draak' }, scripted([]), houseRules),
-    ).toThrow(/draak/)
+    ).toThrow(/Onbekend wezen "draak"/)
     expect(() =>
       executeSave(arena(), { ...save, creatureId: 'speler' }, scripted([]), houseRules),
-    ).toThrow()
-    expect(() => executeSave(arena(), { ...save, dc: 'hoog' }, scripted([]), houseRules)).toThrow()
+    ).toThrow(/is de speler/)
+    expect(() => executeSave(arena(), { ...save, dc: 'hoog' }, scripted([]), houseRules)).toThrow(
+      ZodError,
+    )
   })
 })
 

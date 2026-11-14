@@ -15,8 +15,13 @@ export type Rules = {
 /** 5e 2014 volgens het boek: alle schadedice twee keer rollen, modifier één keer. */
 export const standardRules: Rules = {
   critDamage: (spec, rng) => {
-    const { rolls, total } = rollDice(`${spec.count * 2}d${spec.sides}`, rng)
-    return { total: total + spec.modifier, rolls }
+    const notation = `${spec.count}d${spec.sides}`
+    const first = rollDice(notation, rng)
+    const second = rollDice(notation, rng)
+    return {
+      total: first.total + second.total + spec.modifier,
+      rolls: [...first.rolls, ...second.rolls],
+    }
   },
   natOneSaveFails: false,
 }

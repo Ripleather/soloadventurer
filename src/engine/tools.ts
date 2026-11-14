@@ -135,7 +135,7 @@ export function executeAttack(
   return {
     ...base,
     outcome: crit ? 'crit' : 'hit',
-    damage: { total: damage.total, type: parsed.damageType, rolls: damage.rolls },
+    damage: { total: Math.max(0, damage.total), type: parsed.damageType, rolls: damage.rolls },
   }
 }
 

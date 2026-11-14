@@ -12,6 +12,8 @@ Nieuwste bovenaan. De architectuurbesluiten staan in [architectuur.md](architect
   meegegeven. `houseRules` is de set van Niels (crit: maximale dice, plus modifier, plus één extra
   worp; natuurlijke 1 op een save mislukt), `standardRules` is 5e 2014 volgens het boek. Een andere
   huisregel is een andere `Rules`, geen wijziging in de engine.
+- Review van S3 verwerkt: schade is nooit negatief (stopt op 0, want `applyDamage` weigert negatieve
+  bedragen), de standaard crit werkt ook bij veel dice, en de fouttests controleren de boodschap.
 - Aanvallen nemen `targetAc` van de aanroeper aan, omdat de engine de AC van de speler niet bijhoudt.
 
 ## 2026-11-12
