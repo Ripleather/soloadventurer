@@ -2,6 +2,20 @@
 
 Nieuwste bovenaan. De architectuurbesluiten staan in [architectuur.md](architectuur.md).
 
+## 2026-11-13
+
+- Engine-tools (`src/engine/tools.ts`): `executeAttack` en `executeSave` valideren hun invoer met
+  zod-schema's (strikt, onbekende velden zijn een fout) en wijzigen de state niet. Het toepassen van
+  schade op een doel is een aparte stap via `applyDamage`. De speler is nooit aanvaller of
+  verdediger in deze tools: de speler rolt zelf.
+- Regels die per tafel verschillen staan in `Rules` (`src/engine/rules.ts`) en worden aan de tools
+  meegegeven. `houseRules` is de set van Niels (crit: maximale dice, plus modifier, plus één extra
+  worp; natuurlijke 1 op een save mislukt), `standardRules` is 5e 2014 volgens het boek. Een andere
+  huisregel is een andere `Rules`, geen wijziging in de engine.
+- Review van S3 verwerkt: schade is nooit negatief (stopt op 0, want `applyDamage` weigert negatieve
+  bedragen), de standaard crit werkt ook bij veel dice, en de fouttests controleren de boodschap.
+- Aanvallen nemen `targetAc` van de aanroeper aan, omdat de engine de AC van de speler niet bijhoudt.
+
 ## 2026-11-12
 
 - Review van S1 en S2 (aparte agent): validatie van deelnemers (eindige getallen, geen negatieve HP),
