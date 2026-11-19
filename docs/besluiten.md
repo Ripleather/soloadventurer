@@ -2,6 +2,20 @@
 
 Nieuwste bovenaan. De architectuurbesluiten staan in [architectuur.md](architectuur.md).
 
+## 2026-11-19
+
+- Provider-laag (`src/providers/`): één intern formaat (`types.ts`) met `chat` en `stream`, en een
+  eerste adapter voor OpenRouter. OpenRouter eerst, omdat je daarmee meteen veel modellen test, ook
+  kleine.
+- Het interne formaat is na review ingericht op alle vier aanbieders: systeemprompt apart in
+  `ChatRequest.system`, berichten van de speler kunnen afbeeldingen bevatten (de DM-kaart),
+  tool-resultaten dragen de toolnaam en een `isError`-vlag, assistent-berichten dragen ondoorzichtige
+  `providerData` (redenering die terug moet), en `maxTokens` is optioneel.
+- Tool-argumenten die geen geldig JSON-object zijn, krijgen `input: undefined` en een `parseError`;
+  het zod-schema wijst ze dan af. De ruwe tekst gaat ongewijzigd terug in de geschiedenis.
+- Elke fout uit de provider-laag is een `ProviderError` met een soort en zonder oorzaak. De API-key
+  wordt uit elke melding gehaald vóór het inkorten.
+
 ## 2026-11-13
 
 - Engine-tools (`src/engine/tools.ts`): `executeAttack` en `executeSave` valideren hun invoer met
