@@ -4,6 +4,11 @@ Nieuwste bovenaan. De architectuurbesluiten staan in [architectuur.md](architect
 
 ## 2026-11-19
 
+- Modeltest (`probe.html`, `src/probe/`): een losse pagina op GitHub Pages om een echt model via
+  OpenRouter te testen, ook vanaf een telefoon. Een goblin valt aan; het model moet `enemy_attack`
+  aanroepen en daarna vertellen. De key staat alleen in het geheugen van de pagina. Geen onderdeel van
+  de MVP-interface; hij blijft bestaan als handmatige rooktest naast de modelscenario's van S13.
+
 - Provider-laag (`src/providers/`): één intern formaat (`types.ts`) met `chat` en `stream`, en een
   eerste adapter voor OpenRouter. OpenRouter eerst, omdat je daarmee meteen veel modellen test, ook
   kleine.
