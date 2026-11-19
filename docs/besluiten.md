@@ -4,6 +4,11 @@ Nieuwste bovenaan. De architectuurbesluiten staan in [architectuur.md](architect
 
 ## 2026-11-19
 
+- Kosten: de app is vanaf versie 1 kosteloos. De enige kosten zijn die van het model dat de speler
+  zelf koppelt. De app bevat geen betaalde dienst, geen abonnement en geen eigen server. Er is altijd
+  een gratis route, nu via de gratis modellen van OpenRouter (`:free`), later ook via Google en
+  lokale modellen.
+
 - Modeltest (`probe.html`, `src/probe/`): een losse pagina op GitHub Pages om een echt model via
   OpenRouter te testen, ook vanaf een telefoon. Een goblin valt aan; het model moet `enemy_attack`
   aanroepen en daarna vertellen. De key staat alleen in het geheugen van de pagina. Geen onderdeel van
