@@ -1,0 +1,73 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color-scheme: light dark;
+  line-height: 1.5;
+}
+body {
+  margin: 0;
+  padding: 1rem;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+h1 {
+  font-size: 1.3rem;
+}
+label {
+  display: block;
+  margin-top: 0.75rem;
+  font-weight: 600;
+}
+input {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 1rem;
+  padding: 0.6rem;
+  margin-top: 0.25rem;
+}
+.hint {
+  font-size: 0.85rem;
+  opacity: 0.75;
+  margin: 0.25rem 0 0;
+}
+.buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+button {
+  font-size: 1rem;
+  padding: 0.7rem 1.2rem;
+}
+ol {
+  list-style: none;
+  padding: 0;
+  margin-top: 1.25rem;
+}
+li {
+  border-left: 4px solid #888;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.6rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+li.narration {
+  border-color: #4a7;
+}
+li.tool_call {
+  border-color: #47c;
+}
+li.tool_result {
+  border-color: #c84;
+}
+li.error,
+li.fout {
+  border-color: #c33;
+}
+li small {
+  display: block;
+  font-weight: 600;
+  opacity: 0.75;
+}
+code {
+  font-size: 0.85rem;
+}
